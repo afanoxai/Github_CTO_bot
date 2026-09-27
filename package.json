@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@octokit/rest": "^22.0.1",
+    "@vercel/functions": "^3.9.9",
     "dotenv": "^16.4.5",
     "openai": "^7.13.0",
     "telegraf": "^4.16.3"
