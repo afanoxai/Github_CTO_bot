@@ -96,6 +96,13 @@ export interface AppConfig {
     playgroundRepo: RepoRef;
     /** Named allow-list of repos the agent may open PRs/issues into. Never org-wide. */
     targetRepos: RepoRef[];
+    /**
+     * Explicit, human-curated list of repos that MAY be permanently DELETED. Deliberately separate
+     * from targetRepos: only repos a human lists here can ever be deleted, and a repo that is also
+     * on the work allow-list (or the playground) is refused. Empty/unset -> deletion is disabled.
+     * Mirrors the allow-list principle: the model naming a repo is not the same as it being safe.
+     */
+    deletableRepos: RepoRef[];
   };
   memory: {
     // Upstash Redis REST credentials (Layer D). Both absent -> the in-memory fallback is used
@@ -128,6 +135,8 @@ function buildConfig(): AppConfig {
       pat: required("GITHUB_PAT"),
       playgroundRepo: parseRepoRef(playgroundRaw, "GITHUB_PLAYGROUND_REPO"),
       targetRepos,
+      // Separate opt-in list. Unset/empty means the agent simply cannot delete anything.
+      deletableRepos: parseRepoList("ALLOWED_DELETABLE_REPOS"),
     },
     memory: {
       upstashUrl: optional("UPSTASH_REDIS_REST_URL"),
