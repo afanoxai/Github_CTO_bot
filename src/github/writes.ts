@@ -2,9 +2,11 @@
 // preserves the core safety boundary (CLAUDE_agent_v3.md Section 5): a change to a real repo lands
 // as a pull request from a fresh branch into the default branch, for a human to review and merge.
 // There is deliberately NO function that writes to a default branch directly and NO auto-merge.
+// The ONE irreversible path - deleteRepository - is fenced by its own human-curated allow-list
+// (assertRepoDeletable), so the model naming a repo can never on its own delete one.
 // Logic (atomic Git Data API commit) preserved from v1/v2.
 
-import { octokit, assertRepoAllowed } from "./client.js";
+import { octokit, assertRepoAllowed, assertRepoDeletable } from "./client.js";
 import { getDefaultBranch } from "./repos.js";
 import { repoKey, type FileChange, type RepoRef } from "../types/index.js";
 
@@ -35,6 +37,21 @@ export async function createRepository(
     isPrivate: data.private,
     defaultBranch: data.default_branch ?? "main",
   };
+}
+
+/**
+ * Permanently DELETE a repository. This is the agent's only irreversible write, so it is fenced
+ * harder than anything else here: `assertRepoDeletable` runs first and throws unless the repo is
+ * on the human-curated ALLOWED_DELETABLE_REPOS list AND is not a repo we are entrusted with (the
+ * work allow-list / playground). The caller (the delete_repository tool) additionally requires the
+ * model to have set confirm=true. There is no path from "the model named this repo" to "this repo
+ * is gone" that does not run through a list a human wrote.
+ */
+export async function deleteRepository(repo: RepoRef): Promise<{ fullName: string }> {
+  assertRepoDeletable(repo);
+  await octokit.rest.repos.delete({ owner: repo.owner, repo: repo.repo });
+  console.log(`[github] DELETED repository ${repoKey(repo)}`);
+  return { fullName: repoKey(repo) };
 }
 
 /** File an issue. Returns the created issue's number and URL. */

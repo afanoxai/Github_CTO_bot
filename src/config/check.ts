@@ -33,6 +33,13 @@ console.log(`  playground : ${repoKey(config.github.playgroundRepo)}`);
 console.log(
   `  targets    : ${
     config.github.targetRepos.length ? config.github.targetRepos.map(repoKey).join(", ") : "(none configured yet)"
+  }`
+);
+console.log(
+  `  deletable  : ${
+    config.github.deletableRepos.length
+      ? config.github.deletableRepos.map(repoKey).join(", ")
+      : "(none - deletion disabled)"
   }\n`
 );
 

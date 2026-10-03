@@ -14,6 +14,7 @@ import { createReadPullRequestTool } from "./tools/read-pull-request.js";
 import { createCreateIssueTool } from "./tools/create-issue.js";
 import { createOpenPrTool } from "./tools/open-pr.js";
 import { createCreateRepoTool } from "./tools/create-repo.js";
+import { createDeleteRepoTool } from "./tools/delete-repo.js";
 import { allowedRepos } from "../github/client.js";
 import type { AgentTool } from "./tools/types.js";
 
@@ -33,6 +34,7 @@ export class Agent {
       createCreateIssueTool(),
       createOpenPrTool(),
       createCreateRepoTool(),
+      createDeleteRepoTool(),
     ];
 
     // Inject the concrete allow-list into the static safety prompt so the model knows its options.

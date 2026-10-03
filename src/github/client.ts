@@ -66,3 +66,49 @@ export function resolveAllowedRepo(name: string): RepoRef | null {
     allowedRepoList.find((r) => repoKey(r).toLowerCase() === n || r.repo.toLowerCase() === n) ?? null
   );
 }
+
+// --- deletion: an opt-in, human-curated list, kept SEPARATE from the work allow-list -------
+// Deleting is irreversible, so the boundary is stricter than for reads/writes. Only repos a human
+// has explicitly listed in ALLOWED_DELETABLE_REPOS can be deleted; an empty list disables deletion
+// outright. And a repo on the work allow-list above can NEVER be deleted, even if it is also
+// (mistakenly) on the deletable list - defence in depth against a config slip.
+
+const deletableRepoList: RepoRef[] = config.github.deletableRepos;
+const deletableRepoKeys = new Set(deletableRepoList.map((r) => repoKey(r).toLowerCase()));
+
+/** The list of repos a human has marked deletable, for messages and check output. */
+export function allowedDeletableRepos(): string[] {
+  return deletableRepoList.map(repoKey);
+}
+
+/**
+ * Resolve a repo NAME to a DELETABLE RepoRef, or null. Deliberately looks only at the deletable
+ * list, not the work allow-list - deletion must always be a separate, explicit human grant.
+ */
+export function resolveDeletableRepo(name: string): RepoRef | null {
+  const n = name.trim().toLowerCase();
+  return (
+    deletableRepoList.find((r) => repoKey(r).toLowerCase() === n || r.repo.toLowerCase() === n) ?? null
+  );
+}
+
+/**
+ * Gate deletion. Throws unless `repo` is on the deletable list AND is not a repo we are entrusted
+ * with (work allow-list / playground). The throw is turned into an error-shaped tool result by the
+ * caller, so a refusal reads as a normal "no", not a crash.
+ */
+export function assertRepoDeletable(repo: RepoRef): void {
+  const key = repoKey(repo).toLowerCase();
+  if (!deletableRepoKeys.has(key)) {
+    throw new Error(
+      `Refusing to delete "${repoKey(repo)}" - it is not on the deletable list ` +
+        `(${allowedDeletableRepos().join(", ") || "empty"}). Add it to ALLOWED_DELETABLE_REPOS and redeploy first.`
+    );
+  }
+  if (allowedRepoKeys.has(key)) {
+    throw new Error(
+      `Refusing to delete "${repoKey(repo)}" - it is on the allowed work list, so it is treated as ` +
+        `valuable and can never be deleted by the agent.`
+    );
+  }
+}
