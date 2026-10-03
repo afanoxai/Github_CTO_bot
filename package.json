@@ -5,8 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js"
+    "build": "tsc && node scripts/copy-assets.mjs",
+    "start": "node dist/index.js",
+    "config:check": "tsx src/config/check.ts",
+    "verify:tools": "tsx scripts/verify-tool-calling.ts",
+    "try:agent": "tsx scripts/try-agent.ts",
+    "try:memory": "tsx scripts/try-memory.ts"
   },
   "dependencies": {
     "@octokit/rest": "^22.0.1",

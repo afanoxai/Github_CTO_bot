@@ -1,4 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": ""
+  "buildCommand": "",
+  "functions": {
+    "api/telegram.ts": {
+      "includeFiles": "src/agent/prompts/**"
+    }
+  }
 }

@@ -1,7 +1,8 @@
 import { waitUntil } from "@vercel/functions";
-import { bot } from "../src/bot.js";
+import { bot } from "../src/telegram/bot.js";
+import { config } from "../src/config/env.js";
 
-const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+const webhookSecret = config.telegram.webhookSecret;
 if (!webhookSecret) {
   throw new Error("TELEGRAM_WEBHOOK_SECRET is not set. Add it to your Vercel project's environment variables.");
 }

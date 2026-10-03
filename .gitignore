@@ -3,3 +3,10 @@ dist/
 .env
 errors.log
 .vercel
+
+# Internal build/working docs — kept local, not published to GitHub
+decisions.md
+CLAUDE.md
+CLAUDE_agent_v3.md
+CLIENT_ONE_PAGER.md
+DEPLOYMENT.md
